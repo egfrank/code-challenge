@@ -51,7 +51,7 @@
       $("#parse-type").text("");
     };
 
-    $( ".form" ).submit(function( event ) {
+    $( ".form" ).submit(function( event ){
       event.preventDefault();
       const formInput = $(this).serialize();
       $.ajax({
@@ -59,22 +59,22 @@
         method: "GET",
         success: (data) => {
           resetHTML();
-          const addressComponents = data["address_components"];
-          const addressType = data["address_type"];
+          const addressType = data.address_type;
+          const addressComponents = data.address_components;
           $("#parse-type").text(addressType);
           let tableHTML = "";
-          $.each(addressComponents, (tag, addressPart) => {
-            tableHTML += "<tr><td>" + addressPart + "</td><td>" + tag + "</td></tr>"
-          })
+          $.each(addressComponents, (tag, addressPart) => 
+            tableHTML += `<tr><td>${addressPart}</td><td>${tag}</td></tr>`
+          );
           $('#table-body').append(tableHTML);
           $("#address-results").show();
         },
         error: (xhr, status, error) => {
           resetHTML();
-          let errorMessage = xhr.responseJSON["error"];
+          let errorMessage = xhr.responseJSON.error;
           $("#error-message").text(errorMessage);
           $("#error").show();
-        }
+        },
       });
     });
   </script>
