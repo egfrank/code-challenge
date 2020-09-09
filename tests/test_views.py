@@ -1,19 +1,22 @@
-import pytest
 import urllib.parse
 
 from django.urls import reverse
 
+
 def test_api_parse_succeds(client, success_response):
-    address_string = '123 main st chicago il'
-    url = reverse("address-parse") + "?address=" + urllib.parse.quote(address_string)
+    address_string = "123 main st chicago il"
+    url = (reverse("address-parse") + "?address="
+           + urllib.parse.quote(address_string))
     response = client.get(url)
 
     assert response.status_code == 200
     assert response.json() == success_response
 
+
 def test_api_parse_raises_error(client, error_response):
-    address_string = '123 main st chicago il 123 main st'
-    url = reverse("address-parse") + "?address=" + urllib.parse.quote(address_string)
+    address_string = "123 main st chicago il 123 main st"
+    url = (reverse("address-parse") + "?address="
+           + urllib.parse.quote(address_string))
     response = client.get(url)
 
     assert response.status_code == 400
