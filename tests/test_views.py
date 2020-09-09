@@ -1,15 +1,20 @@
 import pytest
+import urllib.parse
 
+from django.urls import reverse
 
-def test_api_parse_succeds(client):
-    # TODO: Finish this test. Send a request to the API and confirm that the
-    # data comes back in the appropriate format.
+def test_api_parse_succeds(client, success_response):
     address_string = '123 main st chicago il'
-    pytest.fail()
+    url = reverse("address-parse") + "?address=" + urllib.parse.quote(address_string)
+    response = client.get(url)
 
+    assert response.status_code == 200
+    assert response.json() == success_response
 
-def test_api_parse_raises_error(client):
-    # TODO: Finish this test. The address_string below will raise a
-    # RepeatedLabelError, so ParseAddress.parse() will not be able to parse it.
+def test_api_parse_raises_error(client, error_response):
     address_string = '123 main st chicago il 123 main st'
-    pytest.fail()
+    url = reverse("address-parse") + "?address=" + urllib.parse.quote(address_string)
+    response = client.get(url)
+
+    assert response.status_code == 400
+    assert response.json() == error_response
