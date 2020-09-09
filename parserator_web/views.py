@@ -7,7 +7,7 @@ from rest_framework.exceptions import ParseError
 
 
 class Home(TemplateView):
-    template_name = 'parserator_web/index.html'
+    template_name = "parserator_web/index.html"
 
 
 class AddressParse(APIView):
@@ -16,9 +16,19 @@ class AddressParse(APIView):
     def get(self, request):
         # TODO: Flesh out this method to parse an address string using the
         # parse() method and return the parsed components to the frontend.
-        return Response({})
+        input_string = request.GET.get("address", "")
+        try:
+            address_components, address_type = self.parse(input_string)
+        except usaddress.RepeatedLabelError:
+            return Response(
+                {"error": ("Unable to parse this value due to repeated labels.")}
+            )
+        output = {
+            "input_string": input_string,
+            "address_components": address_components,
+            "address_type": address_type,
+        }
+        return Response(output)
 
     def parse(self, address):
-        # TODO: Implement this method to return the parsed components of a
-        # given address using usaddress: https://github.com/datamade/usaddress
-        return address_components, address_type
+        return usaddress.tag(address)
