@@ -20,7 +20,7 @@ class AddressParse(APIView):
         try:
             address_components, address_type = self.parse(input_string)
         except usaddress.RepeatedLabelError:
-            return Response(
+            raise ParseError(
                 {"error": ("Unable to parse this value due to repeated labels.")}
             )
         output = {

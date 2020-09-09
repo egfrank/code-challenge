@@ -41,33 +41,40 @@
 
 {% block extra_js %}
   <script type="text/javascript">
+    // Utility to reset html before
+    // we populate with API response
+    const resetHTML = () => {
+      $("#address-results").hide();
+      $("#error").hide();
+      $("#table-body").empty();
+      $("#error-message").text("");
+      $("#parse-type").text("");
+    };
+
     $( ".form" ).submit(function( event ) {
       event.preventDefault();
       const formInput = $(this).serialize();
-      $.get("/api/parse/?" + formInput, function(data, status){
-        $("#address-results").hide();
-        $("#error").hide();
-
-        $("#table-body").empty();
-        $("#error-message").text("");
-        $("#parse-type").text("");
-
-        if ( data["error"] ) {
-          $("#error-message").text(data["error"]);
+      $.ajax({
+        url: "/api/parse/?" + formInput,
+        method: "GET",
+        success: (data) => {
+          resetHTML();
+          const addressComponents = data["address_components"];
+          const addressType = data["address_type"];
+          $("#parse-type").text(addressType);
+          let tableHTML = "";
+          $.each(addressComponents, (tag, addressPart) => {
+            tableHTML += "<tr><td>" + addressPart + "</td><td>" + tag + "</td></tr>"
+          })
+          $('#table-body').append(tableHTML);
+          $("#address-results").show();
+        },
+        error: (xhr, status, error) => {
+          resetHTML();
+          let errorMessage = xhr.responseJSON["error"];
+          $("#error-message").text(errorMessage);
           $("#error").show();
-          return
         }
-
-        const addressComponents = data["address_components"];
-        const addressType = data["address_type"];
-        $("#parse-type").text(addressType);
-
-        let tableHTML = "";
-        $.each(addressComponents, (tag, addressPart) => {
-          tableHTML += "<tr><td>" + addressPart + "</td><td>" + tag + "</td></tr>"
-        })
-        $('#table-body').append(tableHTML);
-        $("#address-results").show();
       });
     });
   </script>
