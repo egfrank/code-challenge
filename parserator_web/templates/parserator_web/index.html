@@ -13,7 +13,7 @@
         <p><strong>Try it out!</strong> Parse an address in the United States into fields like <code>AddressNumber</code>, <code>StreetName</code> and <code>ZipCode</code>.</p>
         <form class="form" role="form">
           {% csrf_token %}
-          <input name="address" type="text" class="form-control" id="address" placeholder="123 Main St. Suite 100 Chicago, IL">
+          <input name="address" type="text" class="form-control" id="address" placeholder="123 Main St. Suite 100 Chicago, IL" required>
           <button id="submit" type="submit" class="btn btn-success mt-3">Parse!</button>
         </form>
       </div>
@@ -54,10 +54,17 @@
     $( ".form" ).submit(function( event ){
       event.preventDefault();
       const formInput = $(this).serialize();
-      $.ajax({
-        url: "/api/parse/?" + formInput,
-        method: "GET",
-        success: (data) => {
+      fetch("/api/parse/?" + formInput)
+        .then((response) => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              return response.json().then(data => {
+                throw new Error(data.error)
+              })
+            }
+        })
+        .then((data) => {
           resetHTML();
           const addressType = data.address_type;
           const addressComponents = data.address_components;
@@ -68,14 +75,12 @@
           );
           $('#table-body').append(tableHTML);
           $("#address-results").show();
-        },
-        error: (xhr, status, error) => {
+        })
+        .catch((error) => {
           resetHTML();
-          let errorMessage = xhr.responseJSON.error;
-          $("#error-message").text(errorMessage);
+          $("#error-message").text(error.message);
           $("#error").show();
-        },
+        })
       });
-    });
   </script>
 {% endblock %}

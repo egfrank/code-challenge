@@ -17,6 +17,15 @@ class AddressParse(APIView):
         # TODO: Flesh out this method to parse an address string using the
         # parse() method and return the parsed components to the frontend.
         input_string = request.GET.get("address", "")
+        if input_string == "":
+            raise ParseError(
+                {
+                    "error": (
+                        "Please add an address to parse."
+                    )
+                }
+            )
+
         try:
             address_components, address_type = self.parse(input_string)
         except usaddress.RepeatedLabelError:
