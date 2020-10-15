@@ -51,9 +51,19 @@
       $("#parse-type").text("");
     };
 
+    const displayError = (errorText) => {
+      resetHTML();
+      $("#error-message").text(errorText);
+      $("#error").show();
+    };
+
     $( ".form" ).submit(function( event ){
       event.preventDefault();
       const formInput = $(this).serialize();
+      if ( $(this).find("#address").val() == "" ){
+        displayError("Please add an address to parse.");
+        return
+      }
       $.ajax({
         url: "/api/parse/?" + formInput,
         method: "GET",
@@ -70,10 +80,7 @@
           $("#address-results").show();
         },
         error: (xhr, status, error) => {
-          resetHTML();
-          let errorMessage = xhr.responseJSON.error;
-          $("#error-message").text(errorMessage);
-          $("#error").show();
+          displayError(xhr.responseJSON.error);
         },
       });
     });
